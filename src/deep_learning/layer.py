@@ -12,30 +12,38 @@ class Layer:
     @property
     def z(self) -> np.ndarray:
         if self._z is None:
-            raise ValueError("Z is None")
+            raise ValueError("z is None")
         return self._z
+    
+    @z.setter
+    def z(self, new_z: np.ndarray) -> None:
+        self._z = new_z
     
         
     @property
     def a(self) -> np.ndarray:
         if self._a is None:
-            raise ValueError("A is None")
+            raise ValueError("a is None")
         return self._a
     
+    @a.setter
+    def a(self, new_a: np.ndarray) -> None:
+        self._a = new_a
     
-    def forward(self, X: np.ndarray) -> np.ndarray:
-        self.Z = np.dot(X, self.weights) + self.biases
-        self.A = self.activation(self.Z)
-        return self.A
 
-    def backward(self, dA: np.ndarray, prev_A: np.ndarray, learning_rate: float, l2_lambda: float, is_out: bool) -> np.ndarray:
-        dZ: np.ndarray = dA if is_out else dA * self.activation.d(self.Z)
-        dW: np.ndarray = np.dot(prev_A.T, dZ) + l2_lambda * self.weights
-        dB: float = np.sum(dZ, axis=0, keepdims=True) + l2_lambda * self.biases
-        dA_prev: np.ndarray = np.dot(dZ, self.weights.T)
+    def forward(self, x: np.ndarray) -> np.ndarray:
+        self.z = np.dot(x, self.weights) + self.biases
+        self.a = self.activation(self.z)
+        return self.a
+
+    def backward(self, da: np.ndarray, prev_a: np.ndarray, learning_rate: float, l2_lambda: float, is_out: bool) -> np.ndarray:
+        dz: np.ndarray = da if is_out else da * self.activation.d(self.z)
+        dW: np.ndarray = np.dot(prev_a.T, dz) + l2_lambda * self.weights
+        dB: float = np.sum(dz, axis=0, keepdims=True) + l2_lambda * self.biases
+        da_prev: np.ndarray = np.dot(dz, self.weights.T)
         self.weights -= learning_rate * dW
         self.biases -= learning_rate * dB
-        return dA_prev
+        return da_prev
 
     def l2_norm(self) -> float:
         return np.sum(np.square(self.weights)) + np.sum(np.square(self.biases))
